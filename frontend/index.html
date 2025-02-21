@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COOL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>COOL</h1>
+        <button class="clear-btn clear-fridge-btn" onclick="clearFridge()">🗑 Clear Fridge</button>
+        <button onclick="location.href='fridge.html'" class="fridge-button">🧊 My Fridge</button>
+        <input type="text" id="searchInput" placeholder="Search products...">
+        <button class="clear-btn clear-cart-btn" onclick="clearCart()">🗑 Clear Cart</button>
+        <a href="checkout.html" class="cart-link"> 🛒 Cart (<span id="cartCount">0</span>)</a>
+    </header>
+
+    <div class="category-bar">
+        <button class="category-btn active" onclick="filterProducts('All')">All</button>
+        <button class="category-btn" onclick="filterProducts('Meat')">Meat</button>
+        <button class="category-btn" onclick="filterProducts('Vegetables')">Vegetables</button>
+    </div>
+
+    <div class="product-list" id="productList"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

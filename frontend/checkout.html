@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <button onclick="location.href='index.html'" class="back-button">⬅ Back to Home</button>
+        <h1>Checkout</h1>
+    </header>
+
+    <div class="checkout-container">
+        <h2>Your Items</h2>
+        <ul id="combinedItems"></ul>
+        <p>Total: $<span id="totalPrice">0.00</span></p>
+
+        <button onclick="getRecipes()">🍽 Get Recipe Suggestions</button>
+
+        <h2>Suggested Recipes</h2>
+        <div id="recipeResults">Click the button above to get recipe ideas.</div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

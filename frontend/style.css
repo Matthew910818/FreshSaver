@@ -1,0 +1,240 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background-color: #2e7d32;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+.category-bar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+}
+.category-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #ddd;
+}
+.category-btn.active {
+    background-color: #4caf50;
+    color: white;
+}
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+.product {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+.cart-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.cart-link {
+    position: absolute;
+    top: 20px; 
+    right: 30px; 
+    font-size: 24px;
+    color: black; 
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.cart-link:hover {
+    color: darkred;
+}
+
+.cart-link span {
+    font-size: 20px;
+}
+
+#searchInput {
+    width: 350px; 
+    height: 30px; 
+    padding: 6px;
+    font-size: 15px;
+    border: 2px solid #2e7d32;
+    border-radius: 8px;
+    outline: none;
+}
+
+#searchInput:focus {
+    border-color: darkgreen; /* Change border color when focused */
+    box-shadow: 0 0 8px rgba(46, 125, 50, 0.5);
+}
+
+/* Style for the My Fridge button in index.html */
+.fridge-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.fridge-button:hover {
+    background-color: #45a049;
+}
+
+/* Style for the Back button in fridge.html */
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: #FF5733;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.back-button:hover {
+    background-color: #E04E20;
+}
+
+/* Fridge container styling */
+.fridge-container {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Style for input fields */
+.fridge-container input {
+    width: 180px;
+    padding: 8px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.fridge-container button {
+    padding: 8px;
+    background-color: #008CBA;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.fridge-container button:hover {
+    background-color: #0077A3;
+}
+
+/* List items */
+#fridgeList {
+    margin-top: 20px;
+    list-style: none;
+    padding: 0;
+}
+
+#fridgeList li {
+    background: #fff;
+    margin: 5px;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.checkout-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-container button {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.checkout-container button:hover {
+    background-color: #e68900;
+}
+
+#recipeResults {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f1f1f1;
+    border-radius: 8px;
+}
+
+/* General button styling */
+.clear-btn {
+    background-color: #ff4d4d; /* Red color */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.clear-btn:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}
+
+/* Align Clear Cart button near Cart icon */
+.clear-cart-btn {
+    margin-top: 10px;
+}
+
+/* Align Clear Fridge button near Fridge input box */
+.clear-fridge-btn {
+    margin-top: 10px;
+}
+
+.product img {
+    width: 150px;  /* Adjust width as needed */
+    height: 150px; /* Maintain aspect ratio */
+    object-fit: cover; /* Ensures image fits inside the box */
+    border-radius: 10px; /* Rounded corners for aesthetics */
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Fridge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <button onclick="location.href='index.html'" class="back-button">⬅ Back to Home</button>
+        <h1>My Fridge Inventory</h1>
+    </header>
+
+    <div class="fridge-container">
+        <input type="text" id="fridgeItem" placeholder="Enter food item...">
+        <button onclick="changeAmount(-1)">-1</button>
+        <span id="currentAmount">1</span>
+        <button onclick="changeAmount(1)">+1</button>
+        <button onclick="addFridgeItem()">➕ Add</button>
+
+        <ul id="fridgeList"></ul>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
