@@ -11,6 +11,7 @@
     <header>
         <button onclick="location.href='index.html'" class="back-button">⬅ Back to Home</button>
         <h1>Checkout</h1>
+        <button class="user-info-btn" onclick="openUserInfo()">👤 Enter Info</button>
     </header>
 
     <div class="checkout-container">
@@ -18,10 +19,43 @@
         <ul id="combinedItems"></ul>
         <p>Total: $<span id="totalPrice">0.00</span></p>
 
+        <!-- 🔹 User Information Display -->
+        <div class="user-info-display">
+            <h2>Personalized Suggestions</h2>
+            <p><strong>Age:</strong> <span id="displayUserAge">N/A</span></p>
+            <p><strong>Gender:</strong> <span id="displayUserGender">N/A</span></p>
+            <p><strong>Height:</strong> <span id="displayUserHeight">N/A</span> cm</p>
+            <p><strong>Weight:</strong> <span id="displayUserWeight">N/A</span> kg</p>
+        </div>
+
         <button onclick="getRecipes()">🍽 Get Recipe Suggestions</button>
 
         <h2>Suggested Recipes</h2>
         <div id="recipeResults">Click the button above to get recipe ideas.</div>
+    </div>
+
+    <!-- 🔹 User Info Modal -->
+    <div id="userInfoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUserInfo()">&times;</span>
+            <h2>Enter Your Info</h2>
+            <label for="modalUserAge">Age:</label>
+            <input type="number" id="modalUserAge" min="1" placeholder="Enter your age">
+    
+            <label for="modalUserGender">Gender:</label>
+            <select id="modalUserGender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+    
+            <label for="modalUserHeight">Height (cm):</label>
+            <input type="number" id="modalUserHeight" min="50" placeholder="Enter height in cm">
+    
+            <label for="modalUserWeight">Weight (kg):</label>
+            <input type="number" id="modalUserWeight" min="10" placeholder="Enter weight in kg">
+    
+            <button onclick="saveUserInfo()">Save</button>
+        </div>
     </div>
 
     <script src="script.js"></script>

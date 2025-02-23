@@ -10,13 +10,17 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// ✅ Serve Images Correctly
 app.use('/images', express.static(path.join(__dirname, '../images')));
 
+// ✅ Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/healthy_market', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
+// ✅ Define Product Schema
 const Product = mongoose.model('Product', new mongoose.Schema({
   name: String,
   category: String,
@@ -24,38 +28,45 @@ const Product = mongoose.model('Product', new mongoose.Schema({
   price: Number
 }));
 
-console.log("OpenAI API Key:", process.env.OPENAI_API_KEY ? "Loaded ✅" : "❌ Missing");
+console.log("OpenAI API Key:", process.env.OPENAI_API_KEY ? "Loaded ✅" : "❌ Missing API Key");
 
+// ✅ Recipe Generation Endpoint
 app.post("/api/getRecipes", async (req, res) => {
     try {
-        const ingredients = req.body.ingredients;
+        const { ingredients, user } = req.body;
 
-        if (!ingredients) {
-            return res.status(400).json({ error: "No ingredients provided" });
+        if (!ingredients || !user) {
+            return res.status(400).json({ error: "Missing ingredients or user data" });
         }
 
         if (!process.env.OPENAI_API_KEY) {
             return res.status(500).json({ error: "Missing OpenAI API key" });
         }
 
-        // ✅ Updated Prompt for Structured Output
+        // ✅ Optimized Prompt
         const prompt = `I have these ingredients: ${ingredients}. 
         Suggest 3 dishes I can make.
-        Provide the response in JSON format with an array of objects. 
-        Each object should contain:
-        - "dish_name": The name of the dish.
-        - "required_ingredients": A list of ingredients needed.
+        User info:
+        - Age: ${user.age}
+        - Gender: ${user.gender}
+        - Height: ${user.height} cm
+        - Weight: ${user.weight} kg
         
-        Example Output:
+        Respond ONLY in valid JSON format:
         [
-            { "dish_name": "Stir-Fried Chicken", "required_ingredients": ["Chicken", "Garlic", "Soy Sauce"] },
-            { "dish_name": "Vegetable Soup", "required_ingredients": ["Carrots", "Onions", "Tomato"] }
+            { 
+                "dish_name": "Dish Name", 
+                "required_ingredients": [
+                    { "name": "Ingredient Name", "amount_g": 100 }
+                ],
+                "portion_size": "200g"
+            }
         ]`;
 
         const response = await axios.post("https://api.openai.com/v1/chat/completions", {
             model: "gpt-4",
             messages: [{ role: "user", content: prompt }],
-            max_tokens: 200
+            max_tokens: 250
         }, {
             headers: {
                 "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -63,33 +74,48 @@ app.post("/api/getRecipes", async (req, res) => {
             }
         });
 
-        // ✅ Extract structured JSON response
-        const responseText = response.data.choices[0].message.content;
-        let recipes;
-        try {
-            recipes = JSON.parse(responseText); // Convert to JSON format
-        } catch (error) {
-            return res.status(500).json({ error: "Failed to parse OpenAI response" });
+        console.log("🔍 OpenAI Raw Response:", JSON.stringify(response.data, null, 2));
+
+        let aiResponseText = response.data.choices[0]?.message?.content;
+
+        if (!aiResponseText) {
+            return res.status(500).json({ error: "OpenAI returned an empty response" });
         }
 
-        res.json({ recipes });
+        // ✅ Remove unwanted markdown
+        aiResponseText = aiResponseText.replace(/```json|```/g, '').trim();
+
+        try {
+            let recipes = JSON.parse(aiResponseText);
+            res.json({ recipes });
+        } catch (error) {
+            console.error("❌ JSON Parse Error:", error.message);
+            return res.status(500).json({ 
+                error: "Failed to parse OpenAI response", 
+                responseText: aiResponseText 
+            });
+        }
 
     } catch (error) {
-        console.error("❌ Error calling OpenAI API:", error.response ? error.response.data : error.message);
+        console.error("❌ OpenAI API Error:", error.response ? error.response.data : error.message);
         res.status(500).json({ error: "Failed to get recipes" });
     }
 });
 
-
-
-
+// ✅ Fetch Products from Database
 app.get('/api/products', async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
+  try {
+      const products = await Product.find();
+      res.json(products);
+  } catch (error) {
+      res.status(500).json({ error: "Failed to fetch products" });
+  }
 });
 
+// ✅ Health Check Endpoint
 app.get('/test', (req, res) => {
-    res.send('Server is working!');
+    res.send('✅ Server is running fine!');
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// ✅ Start the Server
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));

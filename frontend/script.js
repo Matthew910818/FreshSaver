@@ -2,24 +2,33 @@
 let products = [];
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let fridgeItems = JSON.parse(localStorage.getItem("fridge")) || [];
-let currentAmount = 1; // Default amount for fridge items
+let currentAmount = 1; 
+
+
+function updateCartCount() {
+    let cartCount = document.getElementById("cartCount");
+    if (cartCount) {
+        cartCount.textContent = cart.length;
+    } else {
+        console.warn("⚠ Warning: 'cartCount' element not found! Skipping update.");
+    }
+}
 
 function clearCart() {
-    localStorage.removeItem("cart"); // ✅ Only clear cart when user clicks
-    cart = []; // Reset cart array
-    updateCartCount(); // ✅ Update UI count
-    document.getElementById("cartItems").innerHTML = ""; // Clear cart display
-    document.getElementById("totalPrice").textContent = "0.00"; // Reset total price
+    localStorage.removeItem("cart");
+    cart = []; 
+    updateCartCount();
+    document.getElementById("cartItems").innerHTML = ""; 
+    document.getElementById("totalPrice").textContent = "0.00";
 }
 
 function clearFridge() {
-    localStorage.removeItem("fridge"); // ✅ Only clear fridge when user clicks
-    fridgeItems = []; // Reset fridge array
-    displayFridgeItems(); // ✅ Update UI
+    localStorage.removeItem("fridge");
+    fridgeItems = []; 
+    displayFridgeItems();
 }
 
 
-// Fetch product data from backend and display products
 async function fetchProducts() {
     try {
         const response = await fetch('http://localhost:3000/api/products');
@@ -32,8 +41,9 @@ async function fetchProducts() {
 
 function displayProducts(productList) {
     const container = document.getElementById("productList");
-    container.innerHTML = "";
+    if (!container) return;
 
+    container.innerHTML = "";
     productList.forEach(product => {
         const imageUrl = `http://localhost:3000${product.imageUrl}`;
         const productElement = document.createElement("div");
@@ -50,7 +60,6 @@ function displayProducts(productList) {
     });
 }
 
-// Filter products based on category
 function filterProducts(category) {
     document.querySelectorAll(".category-btn").forEach(btn => btn.classList.remove("active"));
     event.target.classList.add("active");
@@ -59,51 +68,54 @@ function filterProducts(category) {
     displayProducts(filtered);
 }
 
-// Add product to shopping cart
+
 function addToCart(name, price) {
     cart.push({ name, price });
-    localStorage.setItem("cart", JSON.stringify(cart));
-    updateCartCount();
+    localStorage.setItem("cart", JSON.stringify(cart)); // ✅ Save cart in localStorage
+    updateCartCount(); // ✅ Update count after adding item
 }
 
-// Update shopping cart count in UI
+
 function updateCartCount() {
     document.getElementById("cartCount").textContent = cart.length;
 }
 
-// Load cart items from `localStorage` and display them
+
 function loadCart() {
     cart = JSON.parse(localStorage.getItem("cart")) || [];
-    document.getElementById("cartItems").innerHTML = cart.map(item => `<li>${item.name} - $${item.price.toFixed(2)}</li>`).join("");
-    document.getElementById("totalPrice").textContent = cart.reduce((total, item) => total + item.price, 0).toFixed(2);
+    let cartList = document.getElementById("cartItems");
+    let totalElement = document.getElementById("totalPrice");
+
+    if (cartList && totalElement) {
+        cartList.innerHTML = cart.map(item => `<li>${item.name} - $${item.price.toFixed(2)}</li>`).join("");
+        totalElement.textContent = cart.reduce((total, item) => total + item.price, 0).toFixed(2);
+    }
 }
 
-// Change the amount for fridge items using +1 and -1 buttons
+
 function changeAmount(value) {
-    currentAmount = Math.max(1, currentAmount + value); // Ensure amount doesn't go below 1
-    document.getElementById("currentAmount").textContent = currentAmount; // Update displayed amount
+    currentAmount = Math.max(1, currentAmount + value); 
+    document.getElementById("currentAmount").textContent = currentAmount; 
 }
 
-// Add food item + amount to fridge inventory
+
 function addFridgeItem() {
     let itemName = document.getElementById("fridgeItem").value.trim();
+    if (!itemName) return;
 
-    if (itemName === "") return;
-
-    let fridgeItems = JSON.parse(localStorage.getItem("fridge")) || [];
     fridgeItems.push({ name: itemName, amount: currentAmount });
     localStorage.setItem("fridge", JSON.stringify(fridgeItems));
 
     document.getElementById("fridgeItem").value = "";
-    currentAmount = 1; // Reset amount after adding
-    document.getElementById("currentAmount").textContent = currentAmount; // Reset displayed amount
+    currentAmount = 1;
+    document.getElementById("currentAmount").textContent = currentAmount;
     displayFridgeItems();
 }
 
-// Display fridge items in the list
+
 function displayFridgeItems() {
     let fridgeList = document.getElementById("fridgeList");
-    let fridgeItems = JSON.parse(localStorage.getItem("fridge")) || [];
+    if (!fridgeList) return;
 
     fridgeList.innerHTML = "";
     fridgeItems.forEach((item, index) => {
@@ -114,7 +126,7 @@ function displayFridgeItems() {
     });
 }
 
-// Remove an item from the fridge inventory
+
 function removeFridgeItem(index) {
     let fridgeItems = JSON.parse(localStorage.getItem("fridge")) || [];
     fridgeItems.splice(index, 1);
@@ -122,80 +134,168 @@ function removeFridgeItem(index) {
     displayFridgeItems();
 }
 
-// Ensure fridge items display on page load
+
 if (document.getElementById("fridgeList")) {
     displayFridgeItems();
 }
 
-// Ensure cart items load when checkout page is opened
+
 if (document.getElementById("cartItems")) {
     loadCart();
 }
 
-// Fetch products when homepage loads
+
 if (document.getElementById("productList")) {
     fetchProducts();
 }
 
-// Load combined items in checkout.html
+function getUserInfo() {
+    let userInfo = JSON.parse(localStorage.getItem("userInfo")) || {
+        age: "unknown",
+        gender: "unknown",
+        height: "unknown",
+        weight: "unknown"
+    };
+    return userInfo;
+}
+
+
 function loadCheckoutItems() {
     let combinedItemsList = document.getElementById("combinedItems");
-    let totalPrice = 0;
+    let totalElement = document.getElementById("totalPrice");
+    if (!combinedItemsList || !totalElement) return;
 
     combinedItemsList.innerHTML = "";
-
-    let allItems = [...fridgeItems, ...cart]; // Combine fridge & cart items
+    let totalPrice = 0;
+    let allItems = [...fridgeItems, ...cart];
 
     allItems.forEach(item => {
         let li = document.createElement("li");
         li.textContent = `${item.name} - ${item.amount || 1}`;
         combinedItemsList.appendChild(li);
-        totalPrice += item.price || 0; // Add price if available
+        totalPrice += item.price || 0;
     });
 
-    document.getElementById("totalPrice").textContent = totalPrice.toFixed(2);
+    totalElement.textContent = totalPrice.toFixed(2);
 }
 
 async function getRecipes() {
-    let ingredients = [...fridgeItems.map(item => item.name), ...cart.map(item => item.name)].join(", ");
+    let fridgeItems = JSON.parse(localStorage.getItem("fridge")) || [];
+    let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+    let allIngredients = [...fridgeItems.map(item => item.name), ...cartItems.map(item => item.name)].join(", ");
+
+    let userInfo = getUserInfo();
+
+    let prompt = `I have these ingredients: ${allIngredients}. 
+    Suggest 3 dishes I can make.
+    Also, the user provided the following personal details:
+    - Age: ${userInfo.age}
+    - Gender: ${userInfo.gender}
+    - Height: ${userInfo.height} cm
+    - Weight: ${userInfo.weight} kg
+    Based on this information, suggest the appropriate portion sizes for each recipe.
+    Provide the response in JSON format with:
+    [
+        { "dish_name": "Dish Name", "required_ingredients": [{"name": "Ingredient", "amount_g": 100}], "portion_size": "200g" }
+    ]`;
 
     try {
         let response = await fetch("http://localhost:3000/api/getRecipes", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ingredients: ingredients })
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ ingredients: allIngredients, user: userInfo })
         });
 
-        if (!response.ok) {
-            throw new Error(`Server responded with status: ${response.status}`);
-        }
-
         let data = await response.json();
+        console.log("🔍 API Response:", JSON.stringify(data, null, 2)); // ✅ Log full response
 
-        if (data.recipes && Array.isArray(data.recipes)) {
-            let recipeResults = document.getElementById("recipeResults");
-            recipeResults.innerHTML = "";
-
-            data.recipes.forEach(recipe => {
-                let recipeElement = document.createElement("div");
-                recipeElement.classList.add("recipe-item");
-                recipeElement.innerHTML = `
-                    <h3>${recipe.dish_name}</h3>
-                    <p><strong>Ingredients:</strong> ${recipe.required_ingredients.join(", ")}</p>
-                `;
-                recipeResults.appendChild(recipeElement);
-            });
-
+        if (data.recipes) {
+            displayRecipes(data.recipes);
         } else {
-            document.getElementById("recipeResults").textContent = "No recipes found.";
+            document.getElementById("recipeResults").textContent = "⚠ No recipes found!";
         }
     } catch (error) {
-        console.error("❌ Error fetching recipes:", error);
-        document.getElementById("recipeResults").textContent = "❌ Error fetching recipes.";
+        console.error("❌ Error getting recipes:", error);
+        document.getElementById("recipeResults").textContent = "Error fetching recipes.";
     }
 }
 
-// Load checkout items when `checkout.html` is opened
+function displayRecipes(recipes) {
+    if (!Array.isArray(recipes)) {
+        console.error("❌ Expected an array but got:", recipes);
+        document.getElementById("recipeResults").textContent = "⚠ No valid recipes found!";
+        return;
+    }
+
+    let recipeResults = document.getElementById("recipeResults");
+    recipeResults.innerHTML = ""; // Clear previous results
+
+    recipes.forEach(recipe => {
+        let div = document.createElement("div");
+        div.classList.add("recipe");
+
+        let ingredientsList = "No ingredients provided";
+        if (Array.isArray(recipe.required_ingredients) && recipe.required_ingredients.length > 0) {
+            ingredientsList = recipe.required_ingredients
+                .map(ing => `${ing.name}: ${ing.amount_g}g`)
+                .join("<br>");
+        }
+
+        let portionSize = recipe.portion_size || "Not provided";
+
+        div.innerHTML = `
+            <h3><strong>${recipe.dish_name}</strong></h3>
+            <p><strong>Ingredients:</strong><br> ${ingredientsList}</p>
+            <p><strong>Portion Size:</strong> ${portionSize}</p>
+        `;
+        recipeResults.appendChild(div);
+    });
+}
+
+function openUserInfo() {
+    let userInfo = JSON.parse(localStorage.getItem("userInfo")) || {};
+    document.getElementById("modalUserAge").value = userInfo.age || "";
+    document.getElementById("modalUserGender").value = userInfo.gender || "Male";
+    document.getElementById("modalUserHeight").value = userInfo.height || "";
+    document.getElementById("modalUserWeight").value = userInfo.weight || "";
+    document.getElementById("userInfoModal").style.display = "block";
+}
+
+function closeUserInfo() {
+    document.getElementById("userInfoModal").style.display = "none";
+}
+
+function saveUserInfo() {
+    let userInfo = {
+        age: document.getElementById("modalUserAge").value,
+        gender: document.getElementById("modalUserGender").value,
+        height: document.getElementById("modalUserHeight").value,
+        weight: document.getElementById("modalUserWeight").value
+    };
+
+    localStorage.setItem("userInfo", JSON.stringify(userInfo));
+    closeUserInfo();
+}
+
+function updateUserInfoInputs() {
+    let userInfo = JSON.parse(localStorage.getItem("userInfo")) || {};
+    document.getElementById("modalUserAge").value = userInfo.age || "";
+    document.getElementById("modalUserGender").value = userInfo.gender || "Male";
+    document.getElementById("modalUserHeight").value = userInfo.height || "";
+    document.getElementById("modalUserWeight").value = userInfo.weight || "";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateCartCount();
+    loadCart();
+    loadCheckoutItems();
+    displayFridgeItems();
+    updateUserInfoInputs(); // ✅ Load saved user info
+});
+
+
 if (document.getElementById("combinedItems")) {
     loadCheckoutItems();
 }
