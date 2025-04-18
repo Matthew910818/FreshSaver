@@ -288,3 +288,27 @@ header {
     font-size: 24px;
     cursor: pointer;
 }
+
+.error-message {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+.error-message h3 {
+    color: #856404;
+    margin-top: 0;
+}
+
+.error-message pre {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    margin: 10px 0;
+}

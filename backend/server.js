@@ -66,7 +66,7 @@ app.post("/api/getRecipes", async (req, res) => {
         const response = await axios.post("https://api.openai.com/v1/chat/completions", {
             model: "gpt-4",
             messages: [{ role: "user", content: prompt }],
-            max_tokens: 250
+            max_tokens: 1000
         }, {
             headers: {
                 "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -90,10 +90,37 @@ app.post("/api/getRecipes", async (req, res) => {
             res.json({ recipes });
         } catch (error) {
             console.error("❌ JSON Parse Error:", error.message);
-            return res.status(500).json({ 
-                error: "Failed to parse OpenAI response", 
-                responseText: aiResponseText 
-            });
+            
+            // Try to fix incomplete JSON by adding missing closing brackets
+            try {
+                // Count opening and closing brackets to see if they're balanced
+                const openBrackets = (aiResponseText.match(/\[/g) || []).length;
+                const closeBrackets = (aiResponseText.match(/\]/g) || []).length;
+                const openBraces = (aiResponseText.match(/\{/g) || []).length;
+                const closeBraces = (aiResponseText.match(/\}/g) || []).length;
+                
+                let fixedJson = aiResponseText;
+                
+                // Add missing closing braces
+                for (let i = 0; i < openBraces - closeBraces; i++) {
+                    fixedJson += '}';
+                }
+                
+                // Add missing closing brackets
+                for (let i = 0; i < openBrackets - closeBrackets; i++) {
+                    fixedJson += ']';
+                }
+                
+                console.log("🔧 Attempting to fix JSON:", fixedJson);
+                let recipes = JSON.parse(fixedJson);
+                res.json({ recipes });
+            } catch (fixError) {
+                console.error("❌ Could not fix JSON:", fixError.message);
+                return res.status(500).json({ 
+                    error: "Failed to parse OpenAI response", 
+                    responseText: aiResponseText 
+                });
+            }
         }
 
     } catch (error) {

@@ -18,8 +18,17 @@ function clearCart() {
     localStorage.removeItem("cart");
     cart = []; 
     updateCartCount();
-    document.getElementById("cartItems").innerHTML = ""; 
-    document.getElementById("totalPrice").textContent = "0.00";
+    
+    // Update cart items in checkout page if we're on that page
+    if (document.getElementById("cartItems")) {
+        document.getElementById("cartItems").innerHTML = ""; 
+        document.getElementById("totalPrice").textContent = "0.00";
+    }
+    
+    // Refresh the checkout items display
+    if (document.getElementById("combinedItems")) {
+        loadCheckoutItems();
+    }
 }
 
 function clearFridge() {
@@ -36,6 +45,35 @@ async function fetchProducts() {
         displayProducts(products);
     } catch (error) {
         console.error("Error fetching products:", error);
+        
+        // Display error message in product list
+        const container = document.getElementById("productList");
+        if (container) {
+            container.innerHTML = `
+                <div class="error-message">
+                    <h3>⚠️ Could not load products</h3>
+                    <p>The server appears to be offline. Please make sure the backend server is running.</p>
+                    <p>To start the server, open a terminal and run:</p>
+                    <pre>cd backend && node server.js</pre>
+                </div>
+            `;
+        }
+        
+        // Fallback to sample products if server is not available
+        products = [
+            {
+                name: "Carrot",
+                category: "Vegetables",
+                imageUrl: "/images/carrot.png",
+                price: 3.99
+            },
+            {
+                name: "Chicken Breast",
+                category: "Meat",
+                imageUrl: "/images/chicken_breast.png",
+                price: 5.99
+            }
+        ];
     }
 }
 
@@ -128,7 +166,7 @@ function displayFridgeItems() {
 
 
 function removeFridgeItem(index) {
-    let fridgeItems = JSON.parse(localStorage.getItem("fridge")) || [];
+    fridgeItems = JSON.parse(localStorage.getItem("fridge")) || [];
     fridgeItems.splice(index, 1);
     localStorage.setItem("fridge", JSON.stringify(fridgeItems));
     displayFridgeItems();
@@ -165,11 +203,23 @@ function loadCheckoutItems() {
     let totalElement = document.getElementById("totalPrice");
     if (!combinedItemsList || !totalElement) return;
 
+    // Use global variables first, then fallback to localStorage
+    // This ensures we have the most up-to-date state after operations like clearCart()
+    let currentCart = cart;
+    let currentFridgeItems = fridgeItems;
+    
     combinedItemsList.innerHTML = "";
     let totalPrice = 0;
-    let allItems = [...fridgeItems, ...cart];
-
-    allItems.forEach(item => {
+    
+    // Display fridge items
+    currentFridgeItems.forEach(item => {
+        let li = document.createElement("li");
+        li.textContent = `${item.name} - ${item.amount || 1} (From Fridge)`;
+        combinedItemsList.appendChild(li);
+    });
+    
+    // Display and calculate price for cart items only
+    currentCart.forEach(item => {
         let li = document.createElement("li");
         li.textContent = `${item.name} - ${item.amount || 1}`;
         combinedItemsList.appendChild(li);
@@ -180,9 +230,19 @@ function loadCheckoutItems() {
 }
 
 async function getRecipes() {
+    // Show loading indicator
+    const recipeResults = document.getElementById("recipeResults");
+    recipeResults.innerHTML = "Loading recipe suggestions...";
+    
     let fridgeItems = JSON.parse(localStorage.getItem("fridge")) || [];
     let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
     let allIngredients = [...fridgeItems.map(item => item.name), ...cartItems.map(item => item.name)].join(", ");
+
+    // If no ingredients, display a message
+    if (allIngredients.trim() === "") {
+        recipeResults.innerHTML = "Please add some ingredients to your fridge or cart first.";
+        return;
+    }
 
     let userInfo = getUserInfo();
 
@@ -209,16 +269,18 @@ async function getRecipes() {
         });
 
         let data = await response.json();
-        console.log("🔍 API Response:", JSON.stringify(data, null, 2)); // ✅ Log full response
+        console.log("🔍 API Response:", JSON.stringify(data, null, 2));
 
-        if (data.recipes) {
+        if (data.recipes && Array.isArray(data.recipes)) {
             displayRecipes(data.recipes);
+        } else if (data.error) {
+            recipeResults.innerHTML = `<div class="error-message">Error: ${data.error}</div>`;
         } else {
-            document.getElementById("recipeResults").textContent = "⚠ No recipes found!";
+            recipeResults.innerHTML = "⚠ No recipes found or invalid response format.";
         }
     } catch (error) {
         console.error("❌ Error getting recipes:", error);
-        document.getElementById("recipeResults").textContent = "Error fetching recipes.";
+        recipeResults.innerHTML = `<div class="error-message">Error fetching recipes: ${error.message}</div>`;
     }
 }
 
@@ -277,6 +339,7 @@ function saveUserInfo() {
 
     localStorage.setItem("userInfo", JSON.stringify(userInfo));
     closeUserInfo();
+    updateUserInfoDisplay(); // Update the display after saving
 }
 
 function updateUserInfoInputs() {
@@ -287,12 +350,32 @@ function updateUserInfoInputs() {
     document.getElementById("modalUserWeight").value = userInfo.weight || "";
 }
 
+// New function to update the user info display on the checkout page
+function updateUserInfoDisplay() {
+    let userInfo = getUserInfo();
+    
+    // Update the display spans if they exist
+    if (document.getElementById("displayUserAge")) {
+        document.getElementById("displayUserAge").textContent = userInfo.age || "N/A";
+    }
+    if (document.getElementById("displayUserGender")) {
+        document.getElementById("displayUserGender").textContent = userInfo.gender || "N/A";
+    }
+    if (document.getElementById("displayUserHeight")) {
+        document.getElementById("displayUserHeight").textContent = userInfo.height || "N/A";
+    }
+    if (document.getElementById("displayUserWeight")) {
+        document.getElementById("displayUserWeight").textContent = userInfo.weight || "N/A";
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     updateCartCount();
     loadCart();
     loadCheckoutItems();
     displayFridgeItems();
-    updateUserInfoInputs(); // ✅ Load saved user info
+    updateUserInfoInputs();
+    updateUserInfoDisplay(); // Add this to update the display on page load
 });
 
 

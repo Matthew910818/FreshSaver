@@ -22,11 +22,6 @@ const products = [
   }
 ];
 
-Product.insertMany(products).then(() => {
-  console.log("✅ Products added!");
-  mongoose.connection.close();
-});
-
 async function seedDatabase() {
   try {
       await Product.deleteMany({}); // Clears all products before inserting new ones
